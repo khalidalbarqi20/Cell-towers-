@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">مستكشف الأبراج</string>
+
+    <!-- الإشعار الدائم لخدمة التتبع -->
+    <string name="tracking_notification_title">مستكشف الأبراج</string>
+    <string name="tracking_notification_text">جارٍ تسجيل بيانات الموقع والشبكة في الخلفية</string>
+    <string name="tracking_channel_name">تتبع الموقع والشبكة</string>
+
+    <!-- الشاشة الرئيسية -->
+    <string name="start_tracking">ابدأ التتبع</string>
+    <string name="stop_tracking">أوقف التتبع</string>
+    <string name="radius_1km">1 كم</string>
+    <string name="radius_5km">5 كم</string>
+    <string name="radius_10km">10 كم</string>
+    <string name="refresh">تحديث</string>
+    <string name="filter">تصفية</string>
+    <string name="stats_title">الإحصائيات</string>
+    <string name="loading">جارٍ التحميل...</string>
+
+    <!-- بطاقة البرج المتصل به حالياً -->
+    <string name="registered_cell_title">البرج المتصل به حالياً</string>
+    <string name="registered_cell_none">لا توجد بيانات شبكة متاحة حالياً</string>
+
+    <!-- نافذة تفاصيل البرج -->
+    <string name="tower_info_title">تفاصيل البرج</string>
+    <string name="operator_label">المشغّل</string>
+    <string name="cell_id_label">رقم الخلية (Cell ID)</string>
+    <string name="pci_label">PCI</string>
+    <string name="network_type_label">نوع الشبكة</string>
+    <string name="distance_label">المسافة</string>
+    <string name="direction_label">الاتجاه</string>
+    <string name="confidence_label">درجة الثقة</string>
+    <string name="last_seen_label">آخر تحديث</string>
+    <string name="close">إغلاق</string>
+    <string name="not_available">غير متوفر</string>
+
+    <!-- التصفية -->
+    <string name="filter_title">تصفية النتائج</string>
+    <string name="filter_operator">المشغّل</string>
+    <string name="filter_network_type">نوع الشبكة</string>
+    <string name="filter_all">الكل</string>
+    <string name="filter_apply">تطبيق</string>
+    <string name="filter_clear">إزالة التصفية</string>
+
+    <!-- الإحصائيات -->
+    <string name="stats_total_towers">إجمالي عدد الأبراج المعروفة</string>
+    <string name="stats_total_observations">إجمالي عدد القراءات المسجّلة</string>
+    <string name="stats_4g_count">عدد أبراج 4G</string>
+    <string name="stats_5g_count">عدد أبراج 5G</string>
+    <string name="stats_by_operator">عدد الأبراج حسب المشغّل</string>
+
+    <!-- الصلاحيات -->
+    <string name="permission_required_message">يحتاج التطبيق إلى صلاحيات الموقع وحالة الهاتف لعرض الأبراج القريبة وقراءة بيانات الشبكة.</string>
+    <string name="grant_permissions">منح الصلاحيات</string>
+    <string name="search_error_generic">حدث خطأ أثناء البحث عن الأبراج</string>
+</resources>
