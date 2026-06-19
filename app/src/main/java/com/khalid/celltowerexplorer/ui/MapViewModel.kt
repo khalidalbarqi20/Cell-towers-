@@ -42,8 +42,10 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             isLoading.value = true
             errorMessage.value = null
             try {
-                allTowersCache = repository.findTowersNear(lat, lon, radiusMeters)
+                val result = repository.findTowersNear(lat, lon, radiusMeters)
+                allTowersCache = result.towers
                 towers.value = applyFilters(allTowersCache)
+                errorMessage.value = result.diagnosticMessage
             } catch (e: Exception) {
                 errorMessage.value = "تعذّر تحديث الأبراج: ${e.message ?: "خطأ غير معروف"}"
             } finally {

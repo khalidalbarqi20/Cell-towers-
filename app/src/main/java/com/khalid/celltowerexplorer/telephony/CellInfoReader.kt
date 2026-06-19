@@ -49,8 +49,18 @@ class CellInfoReader(private val context: Context) {
     }
 
     /** الخلية المتصل بها الهاتف حالياً فقط (item 8: "البرج المتصل به حالياً"). */
-    fun readRegisteredCell(): CellSnapshot? =
-        readAllCells().firstOrNull { it.isRegistered }
+    fun readRegisteredCell(): CellSnapshot? {
+        val registeredCells = readAllCells().filter { it.isRegistered }
+        if (registeredCells.isEmpty()) return null
+        if (registeredCells.size == 1) return registeredCells.first()
+
+        // قد يُبلغ النظام أحياناً عن أكثر من خلية "مسجّلة" بنفس الوقت (مثلاً خلية
+        // 2G/3G قديمة تُستخدم احتياطياً للمكالمات الصوتية، بينما الإنترنت الفعلي
+        // يعمل على 4G/5G). نفضّل دائماً أعلى جيل شبكة متاح لأنه يعكس الاتصال
+        // الفعلي للبيانات في الغالبية العظمى من الحالات.
+        val priority = mapOf("5G" to 4, "4G" to 3, "3G" to 2, "2G" to 1)
+        return registeredCells.maxByOrNull { priority[it.networkType] ?: 0 }
+    }
 
     private fun mapCellInfo(info: CellInfo): CellSnapshot? = safeCall {
         when (info) {
