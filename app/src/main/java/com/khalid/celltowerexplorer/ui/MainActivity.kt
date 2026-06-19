@@ -215,6 +215,14 @@ class MainActivity : AppCompatActivity() {
             .show(supportFragmentManager, "tower_info")
     }
 
+    private fun showRegisteredCellDialog() {
+        val cell = viewModel.registeredCell.value ?: return
+        val lat = currentLat ?: return
+        val lon = currentLon ?: return
+        TowerInfoDialogFragment.newInstanceFromSnapshot(cell, lat, lon)
+            .show(supportFragmentManager, "tower_info_registered")
+    }
+
     /** بدء/إيقاف خدمة التسجيل في الخلفية كل 5-15 ثانية أثناء التحرك (item 9). */
     private fun toggleTracking() {
         isTrackingActive = !isTrackingActive
@@ -232,13 +240,15 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.registeredCell.observe(this) { cell ->
             binding.registeredCellDetails.text = buildRegisteredCellText(cell)
-            // إعادة رسم العلامات لتحديث تمييز البرج المتصل به إن تغيّر
             renderTowerMarkers(viewModel.towers.value.orEmpty())
         }
 
+        // الضغط على بطاقة البرج المتصل به يفتح نافذة التفاصيل البصرية الكاملة
+        binding.registeredCellCard.setOnClickListener { showRegisteredCellDialog() }
+
         viewModel.errorMessage.observe(this) { message ->
             if (!message.isNullOrBlank()) {
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show()
             }
         }
 

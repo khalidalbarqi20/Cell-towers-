@@ -1,7 +1,10 @@
 package com.khalid.celltowerexplorer.location
 
 import android.annotation.SuppressLint
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Looper
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -46,7 +49,9 @@ class LocationRepository(context: Context) {
             }
         }
 
-        fusedClient.requestLocationUpdates(request, callback, null)
+        // Looper.getMainLooper() مطلوب عند الاستدعاء من داخل Foreground Service
+        // لأن الخيط الخلفي (IO dispatcher) لا يملك Looper خاصاً به.
+        fusedClient.requestLocationUpdates(request, callback, Looper.getMainLooper())
 
         awaitClose { fusedClient.removeLocationUpdates(callback) }
     }

@@ -154,6 +154,7 @@ class CellInfoReader(private val context: Context) {
             signalStrengthDbm = safeCall { strength?.ssRsrp?.let { safeInt(it) } },
             rsrp = safeCall { strength?.ssRsrp?.let { safeInt(it) } },
             rsrq = safeCall { strength?.ssRsrq?.let { safeInt(it) } },
+            sinr = safeCall { strength?.ssSinr?.let { safeInt(it) } },
             nrarfcn = safeCall { identity?.nrarfcn?.let { safeInt(it) } }
         )
     }

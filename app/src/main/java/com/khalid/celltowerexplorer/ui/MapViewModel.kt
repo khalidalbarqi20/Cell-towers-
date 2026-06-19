@@ -21,7 +21,8 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         towerDao = db.towerDao(),
         observationDao = db.observationDao(),
         openCellIdApi = RetrofitClient.openCellIdApi,
-        openCellIdApiKey = BuildConfig.OPENCELLID_API_KEY
+        openCellIdApiKey = BuildConfig.OPENCELLID_API_KEY,
+        beaconDbApi = RetrofitClient.beaconDbApi
     )
 
     // النتائج الخام غير المصفّاة، تُستخدم كقاعدة عند تغيير الفلاتر دون إعادة استعلام الشبكة.

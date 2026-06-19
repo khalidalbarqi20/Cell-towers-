@@ -1,5 +1,8 @@
 package com.khalid.celltowerexplorer.data
 
+import com.khalid.celltowerexplorer.network.BeaconDbApi
+import com.khalid.celltowerexplorer.network.BeaconDbCell
+import com.khalid.celltowerexplorer.network.BeaconDbRequest
 import com.khalid.celltowerexplorer.network.OpenCellIdApi
 import com.khalid.celltowerexplorer.utils.ConfidenceCalculator
 import com.khalid.celltowerexplorer.utils.OperatorLookup
@@ -7,84 +10,114 @@ import retrofit2.HttpException
 import java.io.IOException
 import kotlin.math.cos
 
-/** نتيجة البحث عن الأبراج: قائمة الأبراج، مع رسالة خطأ تشخيصية اختيارية إن فشل الاتصال بـ OpenCellID. */
 data class TowerSearchResult(
     val towers: List<TowerEntity>,
     val diagnosticMessage: String? = null
 )
 
 /**
- * منطق "البحث المحلي أولاً" (item 14):
- * 1) يبحث في قاعدة البيانات المحلية ضمن صندوق محيط بموقع المستخدم.
- * 2) يستعلم من OpenCellID ضمن نفس النطاق ويضيف/يحدّث النتائج محلياً.
- * 3) يعيد القائمة المجمّعة من قاعدة البيانات المحلية بعد التحديث، مع رسالة
- *    تشخيصية إن فشل الاتصال بـ OpenCellID أو لم يُعِد أي نتائج، بدل تجاهل
- *    الخطأ بصمت كما كان سابقاً.
+ * ترتيب الاستعلام:
+ * 1) قاعدة البيانات المحلية أولاً
+ * 2) OpenCellID (يحتاج مفتاح) — أكبر قاعدة بيانات
+ * 3) beaconDB (مجاني بدون مفتاح) — بديل Mozilla، يُستخدم فقط
+ *    لاستكمال البيانات التي لم تجدها OpenCellID
  */
 class TowerRepository(
     private val towerDao: TowerDao,
     private val observationDao: ObservationDao,
     private val openCellIdApi: OpenCellIdApi,
-    private val openCellIdApiKey: String
+    private val openCellIdApiKey: String,
+    private val beaconDbApi: BeaconDbApi
 ) {
 
     suspend fun findTowersNear(lat: Double, lon: Double, radiusMeters: Double): TowerSearchResult {
         val box = boundingBox(lat, lon, radiusMeters)
-        var diagnosticMessage: String? = null
+        val messages = mutableListOf<String>()
 
+        // ① OpenCellID
         if (openCellIdApiKey.isBlank()) {
-            diagnosticMessage = "لم يتم ضبط مفتاح OpenCellID API. تحقق من local.properties أو GitHub Secret."
+            messages.add("OpenCellID: مفتاح API غير مضبوط.")
         } else {
             try {
-                val bboxParam = "${box.latMin},${box.lonMin},${box.latMax},${box.lonMax}"
+                val bbox = "${box.latMin},${box.lonMin},${box.latMax},${box.lonMax}"
                 val response = openCellIdApi.getCellsInArea(
-                    apiKey = openCellIdApiKey,
-                    bbox = bboxParam,
-                    limit = 50
+                    apiKey = openCellIdApiKey, bbox = bbox, limit = 50
                 )
                 val cells = response.cells.orEmpty()
-                cells.forEach { cell -> saveRemoteCell(cell) }
+                cells.forEach { saveOpenCellIdCell(it) }
                 if (cells.isEmpty()) {
-                    diagnosticMessage = "لا توجد بيانات أبراج لدى OpenCellID ضمن هذا النطاق (قد تكون المنطقة غير مغطاة في قاعدة بياناتهم المعتمدة على مساهمات المستخدمين)."
+                    messages.add("OpenCellID: لا توجد بيانات لهذا النطاق.")
                 }
             } catch (e: HttpException) {
-                diagnosticMessage = when (e.code()) {
-                    401, 403 -> "مفتاح OpenCellID غير صالح أو مرفوض (HTTP ${e.code()})."
-                    429 -> "تجاوزت الحد اليومي لطلبات OpenCellID (HTTP 429)."
-                    else -> "خطأ من خادم OpenCellID (HTTP ${e.code()})."
-                }
+                messages.add(when (e.code()) {
+                    401, 403 -> "OpenCellID: مفتاح غير صالح (${e.code()})."
+                    429 -> "OpenCellID: تجاوزت الحد اليومي."
+                    else -> "OpenCellID: خطأ HTTP ${e.code()}."
+                })
             } catch (e: IOException) {
-                diagnosticMessage = "تعذر الاتصال بالإنترنت أو بخادم OpenCellID: ${e.message ?: "خطأ شبكة"}."
+                messages.add("OpenCellID: لا يوجد اتصال بالإنترنت.")
             } catch (e: Exception) {
-                diagnosticMessage = "خطأ غير متوقع أثناء جلب الأبراج: ${e.message ?: "غير معروف"}."
+                messages.add("OpenCellID: ${e.message ?: "خطأ غير معروف"}.")
             }
         }
 
         val localTowers = towerDao.getInBoundingBox(box.latMin, box.latMax, box.lonMin, box.lonMax)
+        val diagnosticMessage = if (messages.isNotEmpty()) messages.joinToString(" | ") else null
         return TowerSearchResult(towers = localTowers, diagnosticMessage = diagnosticMessage)
     }
 
-    private suspend fun saveRemoteCell(cell: com.khalid.celltowerexplorer.network.OpenCellIdCell) {
-        val cellIdKey = "${cell.mcc ?: 0}-${cell.mnc ?: 0}-${cell.lac ?: cell.tac ?: 0}-${cell.cellid ?: 0}"
-        val existing = towerDao.getByCellId(cellIdKey)
-        val observationCount = observationDao.countByCellId(cellIdKey)
+    /**
+     * يستعلم beaconDB عن موقع برج واحد محدد بـ CellSnapshot.
+     * يُستدعى عند الضغط على "البرج المتصل به" لتحديد موقعه على الخريطة
+     * حتى لو لم يكن موجوداً بـ OpenCellID.
+     */
+    suspend fun lookupTowerInBeaconDb(
+        radioType: String, mcc: Int, mnc: Int, lac: Int, cellId: Long
+    ): Pair<Double, Double>? {
+        return try {
+            val radioStr = when (radioType) {
+                "4G" -> "lte"
+                "3G" -> "wcdma"
+                "5G" -> "nr"
+                else -> "gsm"
+            }
+            val response = beaconDbApi.geolocate(
+                BeaconDbRequest(
+                    listOf(BeaconDbCell(
+                        radioType = radioStr,
+                        mobileCountryCode = mcc,
+                        mobileNetworkCode = mnc,
+                        locationAreaCode = lac,
+                        cellId = cellId
+                    ))
+                )
+            )
+            val loc = response.location ?: return null
+            Pair(loc.lat, loc.lng)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private suspend fun saveOpenCellIdCell(cell: com.khalid.celltowerexplorer.network.OpenCellIdCell) {
+        val key = "${cell.mcc ?: 0}-${cell.mnc ?: 0}-${cell.lac ?: cell.tac ?: 0}-${cell.cellid ?: 0}"
+        val existing = towerDao.getByCellId(key)
+        val obsCount = observationDao.countByCellId(key)
         val confidence = ConfidenceCalculator.calculate(
             source = ConfidenceCalculator.SOURCE_OPENCELLID,
-            localObservationCount = observationCount,
+            localObservationCount = obsCount,
             isLocalEstimateConsistent = false
         )
-        towerDao.upsert(
-            TowerEntity(
-                cellId = cellIdKey,
-                operator = existing?.operator ?: OperatorLookup.operatorName(cell.mcc, cell.mnc),
-                latitude = cell.lat,
-                longitude = cell.lon,
-                source = ConfidenceCalculator.SOURCE_OPENCELLID,
-                confidenceScore = confidence,
-                lastSeen = System.currentTimeMillis(),
-                networkType = mapRadioToNetworkType(cell.radio)
-            )
-        )
+        towerDao.upsert(TowerEntity(
+            cellId = key,
+            operator = existing?.operator ?: OperatorLookup.operatorName(cell.mcc, cell.mnc),
+            latitude = cell.lat,
+            longitude = cell.lon,
+            source = ConfidenceCalculator.SOURCE_OPENCELLID,
+            confidenceScore = confidence,
+            lastSeen = System.currentTimeMillis(),
+            networkType = mapRadioToNetworkType(cell.radio)
+        ))
     }
 
     private fun mapRadioToNetworkType(radio: String?): String? = when (radio?.uppercase()) {
@@ -95,21 +128,11 @@ class TowerRepository(
         else -> null
     }
 
-    private data class BoundingBox(
-        val latMin: Double,
-        val lonMin: Double,
-        val latMax: Double,
-        val lonMax: Double
-    )
+    private data class BoundingBox(val latMin: Double, val lonMin: Double, val latMax: Double, val lonMax: Double)
 
     private fun boundingBox(lat: Double, lon: Double, radiusMeters: Double): BoundingBox {
-        val latDelta = radiusMeters / 111_320.0 // درجة عرض واحدة ≈ 111.32 كم
+        val latDelta = radiusMeters / 111_320.0
         val lonDelta = radiusMeters / (111_320.0 * cos(Math.toRadians(lat)).coerceAtLeast(0.0001))
-        return BoundingBox(
-            latMin = lat - latDelta,
-            lonMin = lon - lonDelta,
-            latMax = lat + latDelta,
-            lonMax = lon + lonDelta
-        )
+        return BoundingBox(lat - latDelta, lon - lonDelta, lat + latDelta, lon + lonDelta)
     }
 }

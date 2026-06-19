@@ -8,23 +8,35 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    private const val BASE_URL = "https://opencellid.org/"
+    private const val OPENCELLID_BASE_URL = "https://opencellid.org/"
+    private const val BEACONDB_BASE_URL = "https://beacondb.net/"
 
-    val openCellIdApi: OpenCellIdApi by lazy {
+    private val okHttpClient: OkHttpClient by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BASIC
         }
-        val client = OkHttpClient.Builder()
+        OkHttpClient.Builder()
             .addInterceptor(logging)
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
             .build()
+    }
 
+    val openCellIdApi: OpenCellIdApi by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(client)
+            .baseUrl(OPENCELLID_BASE_URL)
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(OpenCellIdApi::class.java)
+    }
+
+    val beaconDbApi: BeaconDbApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BEACONDB_BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(BeaconDbApi::class.java)
     }
 }

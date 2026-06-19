@@ -1,90 +1,280 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="#1A1A2E">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="16dp">
 
-        <TextView
+        <!-- العنوان والمشغل -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/tower_info_title"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:layout_marginBottom="12dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
 
-        <TextView
-            android:id="@+id/infoOperator"
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/infoOperator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/infoNetworkType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#4FC3F7"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/infoDistance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#81C784"
+                android:textSize="14sp"
+                android:gravity="end" />
+        </LinearLayout>
+
+        <!-- دوائر المقاييس الثلاث -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:layout_marginBottom="6dp" />
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
 
-        <TextView
-            android:id="@+id/infoCellId"
+            <!-- دائرة قوة الإشارة -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <com.khalid.celltowerexplorer.ui.GaugeView
+                    android:id="@+id/gaugeSignal"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="الإشارة"
+                    android:textColor="#B0BEC5"
+                    android:textSize="11sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <!-- دائرة جودة الإشارة -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <com.khalid.celltowerexplorer.ui.GaugeView
+                    android:id="@+id/gaugeQuality"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="الجودة"
+                    android:textColor="#B0BEC5"
+                    android:textSize="11sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <!-- دائرة الثقة -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <com.khalid.celltowerexplorer.ui.GaugeView
+                    android:id="@+id/gaugeConfidence"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="الثقة"
+                    android:textColor="#B0BEC5"
+                    android:textSize="11sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- بطاقة البيانات التفصيلية -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:layout_marginBottom="6dp" />
+            android:layout_marginBottom="8dp"
+            app:cardBackgroundColor="#16213E"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp">
 
-        <TextView
-            android:id="@+id/infoAreaCode"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:layout_marginBottom="6dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
 
-        <TextView
-            android:id="@+id/infoPci"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:layout_marginBottom="6dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="بيانات الخلية"
+                    android:textColor="#4FC3F7"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="8dp" />
 
-        <TextView
-            android:id="@+id/infoNetworkType"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:layout_marginBottom="6dp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="6dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1"
+                        android:text="Cell ID" android:textColor="#B0BEC5" android:textSize="13sp"/>
+                    <TextView android:id="@+id/infoCellId"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:textColor="#FFFFFF" android:textSize="13sp" android:gravity="end"/>
+                </LinearLayout>
 
-        <TextView
-            android:id="@+id/infoDistance"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:layout_marginBottom="6dp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="6dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1"
+                        android:id="@+id/labelAreaCode"
+                        android:text="TAC" android:textColor="#B0BEC5" android:textSize="13sp"/>
+                    <TextView android:id="@+id/infoAreaCode"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:textColor="#FFFFFF" android:textSize="13sp" android:gravity="end"/>
+                </LinearLayout>
 
-        <TextView
-            android:id="@+id/infoDirection"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:layout_marginBottom="6dp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="6dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1"
+                        android:text="PCI" android:textColor="#B0BEC5" android:textSize="13sp"/>
+                    <TextView android:id="@+id/infoPci"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:textColor="#FFFFFF" android:textSize="13sp" android:gravity="end"/>
+                </LinearLayout>
 
-        <TextView
-            android:id="@+id/infoConfidence"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:layout_marginBottom="6dp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="6dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1"
+                        android:text="EARFCN / Band" android:textColor="#B0BEC5" android:textSize="13sp"/>
+                    <TextView android:id="@+id/infoEarfcn"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:textColor="#FFFFFF" android:textSize="13sp" android:gravity="end"/>
+                </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="6dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1"
+                        android:text="NRARFCN / Band" android:textColor="#B0BEC5" android:textSize="13sp"/>
+                    <TextView android:id="@+id/infoNrarfcn"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:textColor="#FFFFFF" android:textSize="13sp" android:gravity="end"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="6dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1"
+                        android:text="RSRP" android:textColor="#B0BEC5" android:textSize="13sp"/>
+                    <TextView android:id="@+id/infoRsrp"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:textColor="#FFFFFF" android:textSize="13sp" android:gravity="end"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="6dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1"
+                        android:text="RSRQ" android:textColor="#B0BEC5" android:textSize="13sp"/>
+                    <TextView android:id="@+id/infoRsrq"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:textColor="#FFFFFF" android:textSize="13sp" android:gravity="end"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="6dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1"
+                        android:text="SINR" android:textColor="#B0BEC5" android:textSize="13sp"/>
+                    <TextView android:id="@+id/infoSinr"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:textColor="#FFFFFF" android:textSize="13sp" android:gravity="end"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView android:layout_width="0dp" android:layout_weight="1"
+                        android:text="الاتجاه" android:textColor="#B0BEC5" android:textSize="13sp"/>
+                    <TextView android:id="@+id/infoDirection"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:textColor="#FFFFFF" android:textSize="13sp" android:gravity="end"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- آخر تحديث -->
         <TextView
             android:id="@+id/infoLastSeen"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
+            android:textColor="#78909C"
+            android:textSize="11sp"
+            android:gravity="center"
             android:layout_marginBottom="12dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/closeButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/close" />
+            android:text="@string/close"
+            app:backgroundTint="#1565C0" />
 
     </LinearLayout>
 </ScrollView>
