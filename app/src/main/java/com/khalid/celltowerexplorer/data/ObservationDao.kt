@@ -10,6 +10,9 @@ interface ObservationDao {
     @Insert
     suspend fun insert(observation: ObservationEntity)
 
+    @Query("SELECT * FROM observations ORDER BY timestamp DESC LIMIT :limit")
+    suspend fun getRecent(limit: Int = 200): List<ObservationEntity>
+
     @Query("SELECT * FROM observations WHERE cellId = :cellId ORDER BY timestamp DESC")
     suspend fun getByCellId(cellId: String): List<ObservationEntity>
 
@@ -19,6 +22,9 @@ interface ObservationDao {
     @Query("SELECT COUNT(*) FROM observations")
     suspend fun totalCount(): Int
 
-    @Query("SELECT * FROM observations ORDER BY timestamp DESC LIMIT :limit")
-    suspend fun getRecent(limit: Int): List<ObservationEntity>
+    @Query("DELETE FROM observations")
+    suspend fun deleteAll()
+
+    @Query("SELECT * FROM observations WHERE timestamp > :since ORDER BY timestamp DESC")
+    suspend fun getSince(since: Long): List<ObservationEntity>
 }

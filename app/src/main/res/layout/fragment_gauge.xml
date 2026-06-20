@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0A0A1A">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:paddingBottom="72dp">
+
+        <!-- شريط الحالة العلوي -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:id="@+id/tvOperator"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="--"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tvNetworkType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--"
+                android:textColor="#4FC3F7"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:background="#1E3A5F"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"/>
+        </LinearLayout>
+
+        <!-- الدوائر الثلاث الرئيسية -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+                <com.khalid.celltowerexplorer.ui.GaugeView
+                    android:id="@+id/gaugeRsrp"
+                    android:layout_width="100dp" android:layout_height="100dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="RSRP" android:textColor="#B0BEC5" android:textSize="12sp"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+                <com.khalid.celltowerexplorer.ui.GaugeView
+                    android:id="@+id/gaugeSinr"
+                    android:layout_width="100dp" android:layout_height="100dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="SINR" android:textColor="#B0BEC5" android:textSize="12sp"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+                <com.khalid.celltowerexplorer.ui.GaugeView
+                    android:id="@+id/gaugeRsrq"
+                    android:layout_width="100dp" android:layout_height="100dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="RSRQ" android:textColor="#B0BEC5" android:textSize="12sp"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- بيانات الخلية التفصيلية -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            app:cardBackgroundColor="#12122A" app:cardCornerRadius="12dp" app:cardElevation="0dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="14dp">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="بيانات الخلية" android:textColor="#4FC3F7"
+                    android:textStyle="bold" android:textSize="13sp" android:layout_marginBottom="10dp"/>
+
+                <!-- صف 1 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Cell ID" android:textColor="#78909C" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvCellId" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:textColor="#FFFFFF"
+                            android:textSize="13sp" android:text="--"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="PCI" android:textColor="#78909C" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvPci" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:textColor="#FFFFFF"
+                            android:textSize="13sp" android:text="--"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="TAC/LAC" android:textColor="#78909C" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvTac" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:textColor="#FFFFFF"
+                            android:textSize="13sp" android:text="--"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- صف 2 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="MCC-MNC" android:textColor="#78909C" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvMccMnc" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:textColor="#FFFFFF"
+                            android:textSize="13sp" android:text="--"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="EARFCN" android:textColor="#78909C" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvEarfcn" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:textColor="#FFFFFF"
+                            android:textSize="13sp" android:text="--"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="الباند" android:textColor="#78909C" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvBand" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:textColor="#4FC3F7"
+                            android:textSize="13sp" android:textStyle="bold" android:text="--"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- صف 3: قوة الإشارة -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Signal" android:textColor="#78909C" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvSignal" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:textColor="#FFFFFF"
+                            android:textSize="13sp" android:text="--"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="RSSI" android:textColor="#78909C" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvRssi" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:textColor="#FFFFFF"
+                            android:textSize="13sp" android:text="--"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="NRARFCN" android:textColor="#78909C" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvNrarfcn" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:textColor="#FFFFFF"
+                            android:textSize="13sp" android:text="--"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- زر التتبع -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTracking"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="ابدأ التتبع"
+            android:textSize="16sp"
+            app:backgroundTint="#1565C0"
+            app:cornerRadius="12dp"/>
+
+    </LinearLayout>
+</ScrollView>

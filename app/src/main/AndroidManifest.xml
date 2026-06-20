@@ -9,8 +9,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- اختياري: مطلوب فقط إذا احتجت تسجيل بيانات حتى والتطبيق في الخلفية تماماً على أندرويد 10+ -->
-    <!-- <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> -->
 
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
@@ -32,16 +30,20 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".ui.StatsActivity"
-            android:exported="false"
-            android:label="@string/stats_title" />
-
         <service
             android:name=".location.LocationTrackingService"
             android:foregroundServiceType="location"
             android:exported="false" />
 
-    </application>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
+    </application>
 </manifest>

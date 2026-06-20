@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_gauge"
+        android:icon="@drawable/ic_gauge"
+        android:title="المقاييس" />
+    <item
+        android:id="@+id/nav_map"
+        android:icon="@drawable/ic_map"
+        android:title="الخريطة" />
+    <item
+        android:id="@+id/nav_data"
+        android:icon="@drawable/ic_data"
+        android:title="البيانات" />
+    <item
+        android:id="@+id/nav_stats"
+        android:icon="@drawable/ic_stats"
+        android:title="إحصائيات" />
+</menu>

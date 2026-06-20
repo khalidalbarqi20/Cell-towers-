@@ -3,6 +3,7 @@ package com.khalid.celltowerexplorer.location
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -13,6 +14,8 @@ import com.khalid.celltowerexplorer.R
 import com.khalid.celltowerexplorer.data.AppDatabase
 import com.khalid.celltowerexplorer.data.ObservationEntity
 import com.khalid.celltowerexplorer.telephony.CellInfoReader
+import com.khalid.celltowerexplorer.ui.MainActivity
+import com.khalid.celltowerexplorer.utils.BandCalculator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -20,12 +23,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-/**
- * خدمة أمامية (Foreground Service) تسجّل كل 10 ثوانٍ (ضمن نطاق 5-15 ثانية
- * المطلوب في item 9) موقع المستخدم وبيانات الخلية المتصل بها في قاعدة
- * البيانات المحلية. الإشعار الدائم مطلوب من نظام أندرويد لخدمات الموقع
- * الأمامية على أندرويد 8+ (item 17: العمل دون سيرفر، استهلاك بطارية منخفض).
- */
 class LocationTrackingService : Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -36,7 +33,7 @@ class LocationTrackingService : Service() {
     companion object {
         const val CHANNEL_ID = "cell_tracking_channel"
         const val NOTIFICATION_ID = 1001
-        const val INTERVAL_MILLIS = 10_000L
+        const val INTERVAL_MILLIS = 5_000L
 
         fun start(context: Context) {
             val intent = Intent(context, LocationTrackingService::class.java)
@@ -70,16 +67,30 @@ class LocationTrackingService : Service() {
         trackingJob = serviceScope.launch {
             locationRepository.locationUpdates(INTERVAL_MILLIS).collect { loc ->
                 val db = AppDatabase.getInstance(applicationContext)
-                val registeredCell = cellInfoReader.readRegisteredCell()
+                val cell = cellInfoReader.readRegisteredCell()
+
+                // حساب الباند من EARFCN أو NRARFCN
+                val bandInfo = BandCalculator.fromEarfcn(cell?.earfcn)
+                    ?: BandCalculator.fromNrarfcn(cell?.nrarfcn)
+
                 db.observationDao().insert(
                     ObservationEntity(
                         latitude = loc.latitude,
                         longitude = loc.longitude,
-                        cellId = registeredCell?.cellId?.toString(),
-                        pci = registeredCell?.pci,
-                        tac = registeredCell?.areaCode,
-                        signalStrength = registeredCell?.signalStrengthDbm,
-                        networkType = registeredCell?.networkType,
+                        cellId = cell?.cellId?.toString(),
+                        pci = cell?.pci,
+                        tac = cell?.areaCode,
+                        mcc = cell?.mcc,
+                        mnc = cell?.mnc,
+                        operator = cell?.operatorName,
+                        signalStrength = cell?.signalStrengthDbm,
+                        rsrp = cell?.rsrp,
+                        rsrq = cell?.rsrq,
+                        sinr = cell?.sinr,
+                        earfcn = cell?.earfcn,
+                        nrarfcn = cell?.nrarfcn,
+                        band = bandInfo?.label,
+                        networkType = cell?.networkType,
                         timestamp = loc.timestamp
                     )
                 )
@@ -88,10 +99,16 @@ class LocationTrackingService : Service() {
     }
 
     private fun buildNotification(): Notification {
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0,
+            Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE
+        )
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.tracking_notification_title))
             .setContentText(getString(R.string.tracking_notification_text))
             .setSmallIcon(R.drawable.ic_notification)
+            .setContentIntent(pendingIntent)
             .setOngoing(true)
             .build()
     }
@@ -103,8 +120,8 @@ class LocationTrackingService : Service() {
                 getString(R.string.tracking_channel_name),
                 NotificationManager.IMPORTANCE_LOW
             )
-            val manager = getSystemService(NotificationManager::class.java)
-            manager?.createNotificationChannel(channel)
+            getSystemService(NotificationManager::class.java)
+                ?.createNotificationChannel(channel)
         }
     }
 

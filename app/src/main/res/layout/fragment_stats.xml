@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0A0A1A">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:paddingBottom="80dp">
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="الإحصائيات" android:textColor="#FFFFFF"
+            android:textSize="20sp" android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- بطاقات الأرقام الكبيرة -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginBottom="10dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="wrap_content" android:layout_marginEnd="5dp"
+                app:cardBackgroundColor="#12122A" app:cardCornerRadius="12dp" app:cardElevation="0dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="14dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="أبراج معروفة" android:textColor="#78909C" android:textSize="11sp"/>
+                    <TextView android:id="@+id/tvTotalTowers"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="0" android:textColor="#4FC3F7"
+                        android:textSize="32sp" android:textStyle="bold"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="wrap_content" android:layout_marginStart="5dp"
+                app:cardBackgroundColor="#12122A" app:cardCornerRadius="12dp" app:cardElevation="0dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="14dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="قراءات مسجّلة" android:textColor="#78909C" android:textSize="11sp"/>
+                    <TextView android:id="@+id/tvTotalObs"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="0" android:textColor="#81C784"
+                        android:textSize="32sp" android:textStyle="bold"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- بطاقة 4G/5G -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            app:cardBackgroundColor="#12122A" app:cardCornerRadius="12dp" app:cardElevation="0dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:padding="14dp">
+                <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="أبراج 4G" android:textColor="#78909C" android:textSize="11sp"/>
+                    <TextView android:id="@+id/tvCount4g"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="0" android:textColor="#FFC107"
+                        android:textSize="28sp" android:textStyle="bold"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="أبراج 5G" android:textColor="#78909C" android:textSize="11sp"/>
+                    <TextView android:id="@+id/tvCount5g"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="0" android:textColor="#4FC3F7"
+                        android:textSize="28sp" android:textStyle="bold"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="أبراج 2G/3G" android:textColor="#78909C" android:textSize="11sp"/>
+                    <TextView android:id="@+id/tvCountOther"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="0" android:textColor="#B0BEC5"
+                        android:textSize="28sp" android:textStyle="bold"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- توزيع المشغّلين -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            app:cardBackgroundColor="#12122A" app:cardCornerRadius="12dp" app:cardElevation="0dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="14dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="توزيع المشغّلين" android:textColor="#4FC3F7"
+                    android:textStyle="bold" android:textSize="13sp" android:layout_marginBottom="10dp"/>
+                <LinearLayout android:id="@+id/operatorContainer"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>
