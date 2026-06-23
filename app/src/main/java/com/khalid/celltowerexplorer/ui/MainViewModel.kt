@@ -1,6 +1,9 @@
 package com.khalid.celltowerexplorer.ui
 
 import android.app.Application
+import android.os.Build
+import android.telephony.CellInfo
+import android.telephony.TelephonyManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -13,15 +16,19 @@ import com.khalid.celltowerexplorer.location.UserLocation
 import com.khalid.celltowerexplorer.network.RetrofitClient
 import com.khalid.celltowerexplorer.telephony.CellInfoReader
 import com.khalid.celltowerexplorer.telephony.CellSnapshot
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.concurrent.Executor
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val db = AppDatabase.getInstance(application)
     private val cellInfoReader = CellInfoReader(application)
     private val locationRepo = LocationRepository(application)
+    private val telephonyManager = application.getSystemService(android.content.Context.TELEPHONY_SERVICE) as TelephonyManager
     private val repository = TowerRepository(
         towerDao = db.towerDao(),
         observationDao = db.observationDao(),
@@ -48,9 +55,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun startCellPolling() {
         viewModelScope.launch {
             while (isActive) {
-                registeredCell.value = cellInfoReader.readRegisteredCell()
+                refreshCellInfo()
                 delay(3000)
             }
+        }
+    }
+
+    private suspend fun refreshCellInfo() {
+        withContext(Dispatchers.IO) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                try {
+                    val executor = Executor { it.run() }
+                    telephonyManager.requestCellInfoUpdate(executor,
+                        object : TelephonyManager.CellInfoCallback() {
+                            override fun onCellInfo(cellInfo: MutableList<CellInfo>) {}
+                            override fun onError(errorCode: Int, detail: Throwable?) {}
+                        }
+                    )
+                    delay(300)
+                } catch (e: Exception) {}
+            }
+            val cell = cellInfoReader.readRegisteredCell()
+            withContext(Dispatchers.Main) { registeredCell.value = cell }
         }
     }
 
@@ -62,9 +88,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 locationRepo.locationUpdates(5000).collect { loc ->
                     userLocation.value = loc
                 }
-            } catch (e: Exception) {
-                // الصلاحيات غير ممنوحة بعد
-            }
+            } catch (e: Exception) {}
         }
     }
 
