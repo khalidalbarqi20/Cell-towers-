@@ -3,6 +3,7 @@ package com.khalid.celltowerexplorer.ui
 import android.app.Application
 import android.os.Build
 import android.telephony.CellInfo
+import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
@@ -24,99 +25,86 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.Executor
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-
     private val db = AppDatabase.getInstance(application)
     private val cellInfoReader = CellInfoReader(application)
     private val locationRepo = LocationRepository(application)
     private val telephonyManager = application.getSystemService(android.content.Context.TELEPHONY_SERVICE) as TelephonyManager
     private val repository = TowerRepository(
-        towerDao = db.towerDao(),
-        observationDao = db.observationDao(),
+        towerDao = db.towerDao(), observationDao = db.observationDao(),
         openCellIdApi = RetrofitClient.openCellIdApi,
         openCellIdApiKey = BuildConfig.OPENCELLID_API_KEY,
-        beaconDbApi = RetrofitClient.beaconDbApi
-    )
+        beaconDbApi = RetrofitClient.beaconDbApi)
 
-    val registeredCell = MutableLiveData<CellSnapshot?>(null)
-    val userLocation   = MutableLiveData<UserLocation?>(null)
-    val towers         = MutableLiveData<List<TowerEntity>>(emptyList())
-    val isLoading      = MutableLiveData(false)
-    val errorMessage   = MutableLiveData<String?>(null)
-
+    val registeredCell  = MutableLiveData<CellSnapshot?>(null)
+    val allVisibleCells = MutableLiveData<List<CellSnapshot>>(emptyList())
+    val userLocation    = MutableLiveData<UserLocation?>(null)
+    val towers          = MutableLiveData<List<TowerEntity>>(emptyList())
+    val isLoading       = MutableLiveData(false)
+    val errorMessage    = MutableLiveData<String?>(null)
     private var allTowersCache = emptyList<TowerEntity>()
-    private var selectedOperator: String? = null
-    private var selectedNetworkType: String? = null
+    private var selOp: String? = null
+    private var selNt: String? = null
 
-    init {
-        startCellPolling()
-        startLocationUpdates()
-    }
+    init { startCellPolling(); startLocationUpdates() }
 
     private fun startCellPolling() {
         viewModelScope.launch {
-            while (isActive) {
-                refreshCellInfo()
-                delay(3000)
-            }
+            while (isActive) { refreshCellInfo(); delay(3000) }
         }
     }
+
+    private fun getDataTm(): TelephonyManager = try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val subId = SubscriptionManager.getDefaultDataSubscriptionId()
+            if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID)
+                telephonyManager.createForSubscriptionId(subId)
+            else telephonyManager
+        } else telephonyManager
+    } catch (e: Exception) { telephonyManager }
 
     private suspend fun refreshCellInfo() {
         withContext(Dispatchers.IO) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 try {
-                    val executor = Executor { it.run() }
-                    telephonyManager.requestCellInfoUpdate(executor,
+                    getDataTm().requestCellInfoUpdate(Executor { it.run() },
                         object : TelephonyManager.CellInfoCallback() {
-                            override fun onCellInfo(cellInfo: MutableList<CellInfo>) {}
-                            override fun onError(errorCode: Int, detail: Throwable?) {}
-                        }
-                    )
+                            override fun onCellInfo(c: MutableList<CellInfo>) {}
+                            override fun onError(e: Int, d: Throwable?) {}
+                        })
                     delay(300)
-                } catch (e: Exception) {}
+                } catch (_: Exception) {}
             }
-            val cell = cellInfoReader.readRegisteredCell()
-            withContext(Dispatchers.Main) { registeredCell.value = cell }
+            val all = cellInfoReader.readAllCells()
+            val pri = mapOf("5G" to 4,"4G" to 3,"3G" to 2,"2G" to 1)
+            val reg = all.filter { it.isRegistered }.maxByOrNull { pri[it.networkType] ?: 0 }
+            withContext(Dispatchers.Main) { registeredCell.value = reg; allVisibleCells.value = all }
         }
     }
 
     private fun startLocationUpdates() {
         viewModelScope.launch {
             try {
-                val last = locationRepo.getLastKnownLocation()
-                if (last != null) userLocation.value = last
-                locationRepo.locationUpdates(5000).collect { loc ->
-                    userLocation.value = loc
-                }
-            } catch (e: Exception) {}
+                locationRepo.getLastKnownLocation()?.let { userLocation.value = it }
+                locationRepo.locationUpdates(5000).collect { userLocation.value = it }
+            } catch (_: Exception) {}
         }
     }
 
-    fun searchTowers(lat: Double, lon: Double, radiusMeters: Double) {
+    fun searchTowers(lat: Double, lon: Double, r: Double) {
         viewModelScope.launch {
-            isLoading.value = true
-            errorMessage.value = null
+            isLoading.value = true; errorMessage.value = null
             try {
-                val result = repository.findTowersNear(lat, lon, radiusMeters)
+                val result = repository.findTowersNear(lat, lon, r)
                 allTowersCache = result.towers
                 towers.value = applyFilters(allTowersCache)
                 errorMessage.value = result.diagnosticMessage
-            } catch (e: Exception) {
-                errorMessage.value = "خطأ: ${e.message}"
-            } finally {
-                isLoading.value = false
-            }
+            } catch (e: Exception) { errorMessage.value = "خطأ: ${e.message}" }
+            finally { isLoading.value = false }
         }
     }
 
-    fun setFilters(operator: String?, networkType: String?) {
-        selectedOperator = operator
-        selectedNetworkType = networkType
-        towers.value = applyFilters(allTowersCache)
-    }
-
-    private fun applyFilters(list: List<TowerEntity>): List<TowerEntity> = list.filter { t ->
-        (selectedOperator == null || t.operator == selectedOperator) &&
-        (selectedNetworkType == null || t.networkType == selectedNetworkType)
+    fun setFilters(op: String?, nt: String?) { selOp = op; selNt = nt; towers.value = applyFilters(allTowersCache) }
+    private fun applyFilters(list: List<TowerEntity>) = list.filter {
+        (selOp == null || it.operator == selOp) && (selNt == null || it.networkType == selNt)
     }
 }
